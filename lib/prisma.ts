@@ -91,12 +91,8 @@ function getPrismaClient(): PrismaClient {
     } catch (error: any) {
       console.error('Failed to create postgres adapter, falling back to default client:', error);
       // Fallback to default Prisma client (uses built-in connection pooling)
+      // PrismaClient automatically reads DATABASE_URL from environment variables
       client = new PrismaClient({
-        datasources: {
-          db: {
-            url: databaseUrl,
-          },
-        },
         log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : [],
       });
     }
