@@ -1,0 +1,245 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  role         String    @default("admin") // admin, editor, etc.
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  
+  auditLogs    AuditLog[]
+  
+  @@map("users")
+}
+
+model Staff {
+  id            String   @id @default(cuid())
+  name          String
+  department    String
+  designation  String
+  email         String?
+  phone         String?
+  status        String   @default("ACTIVE") // ACTIVE, INACTIVE
+  avatarUrl     String?  @map("avatar_url")
+  qualifications String? // Staff qualifications
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  
+  @@map("staff")
+}
+
+model Fee {
+  id             String   @id @default(cuid())
+  programName    String   @map("program_name")
+  academicYear   String   @map("academic_year")
+  yearOrSemester String   @map("year_or_semester") // e.g., "Year 1", "Semester 1"
+  category       String   // e.g., "Tuition", "Library", "Lab"
+  amount         Decimal
+  currency       String   @default("INR")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  
+  @@map("fees")
+}
+
+model Room {
+  id            String   @id @default(cuid())
+  roomCode      String   @unique @map("room_code")
+  buildingName  String   @map("building_name")
+  floor         String
+  textDirections String? @map("text_directions")
+  latitude      Float?
+  longitude     Float?
+  imageUrl      String?  @map("image_url")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  
+  @@map("rooms")
+}
+
+model Conversation {
+  id          String    @id @default(cuid())
+  title       String
+  clientUserId String? @map("client_user_id") // Associate with client user
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  
+  messages    Message[]
+  
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String       @map("conversation_id")
+  sender         String       // "user" or "assistant"
+  content        String
+  images         String?      // JSON array of image objects
+  createdAt      DateTime     @default(now()) @map("created_at")
+  
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  
+  @@map("messages")
+}
+
+model Knowledge {
+  id              String   @id @default(cuid())
+  source          String
+  type            String
+  name            String
+  text            String
+  imageUrl        String?  @map("image_url")
+  imageDescription String? @map("image_description")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("knowledge")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String   @map("actor_id")
+  action     String   // e.g., "LOGIN", "STAFF_UPDATE", "FEE_CHANGE"
+  entityType String?  @map("entity_type") // e.g., "Staff", "Fee", "Room"
+  entityId   String?  @map("entity_id")
+  severity   String   @default("INFO") // INFO, WARNING, ERROR, IMPORTANT, HIGH_PRIORITY
+  createdAt  DateTime @default(now()) @map("created_at")
+  
+  actor      User     @relation(fields: [actorId], references: [id])
+  
+  @@map("audit_logs")
+}
+
+model ClientUser {
+  id           String   @id @default(cuid())
+  name         String?
+  mobile       String
+  email        String   @unique
+  userType     String   // "student" | "guest" | "parent"
+  emailVerified Boolean @default(false) @map("email_verified")
+  createdAt    DateTime @default(now()) @map("created_at")
+  
+  @@map("client_users")
+}
+
+model EmailOTP {
+  id         String   @id @default(cuid())
+  email      String
+  otpHash    String   @map("otp_hash")
+  expiresAt  DateTime @map("expires_at")
+  attempts   Int      @default(0)
+  verified   Boolean  @default(false)
+  lastSentAt DateTime @map("last_sent_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+  
+  @@index([email])
+  @@map("email_otps")
+}
+
+model TimeTable {
+  id          String   @id @default(cuid())
+  program     String
+  semester    String
+  section     String?
+  dayOfWeek   String
+  period      String
+  subject     String
+  staffName   String?
+  room        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("time_tables")
+}
+
+model ExamTimeTable {
+  id          String   @id @default(cuid())
+  program     String
+  semester    String
+  examType    String
+  examDate    DateTime
+  subject     String
+  subjectCode String?
+  session     String?
+  room        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("exam_time_tables")
+}
+
+model ClassTimetable {
+  id          String   @id @default(cuid())
+  programName String
+  semester    String
+  dayOfWeek   String
+  period      String
+  subject     String
+  faculty     String?
+  room        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("class_timetables")
+}
+
+model ExamTimetable {
+  id          String   @id @default(cuid())
+  programName String
+  semester    String
+  examName    String
+  subject     String
+  examDate    DateTime
+  startTime   String
+  endTime     String
+  room        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("exam_timetables")
+}
+
+model AcademicPdf {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  semester    String?
+  subject     String?
+  category    String?  // e.g., "Notes", "Syllabus", "Question Paper", "Study Material", "Others"
+  fileUrl     String   @map("file_url")
+  uploadedBy  String?  @map("uploaded_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([semester])
+  @@index([subject])
+  @@index([category])
+  @@map("academic_pdfs")
+}
+
+model Contact {
+  id          String   @id @default(cuid())
+  name        String
+  department  String?
+  designation String?
+  email       String?
+  phone       String?
+  category    String?  // e.g., "Administration", "Academic", "Support", "Emergency"
+  priority    Int      @default(0) // Higher number = higher priority for display order
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@map("contacts")
+}
