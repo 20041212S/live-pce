@@ -15,6 +15,9 @@ import prisma from '@/lib/prisma';
  */
 export async function POST(request: NextRequest) {
   try {
+    // Debug: Verify DATABASE_URL is set
+    console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
+    
     const body = await request.json();
     const { name, mobile, email, userType } = body;
 

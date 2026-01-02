@@ -17,6 +17,9 @@ import { sendOTPEmail } from '@/lib/otpEmail';
  */
 export async function POST(request: NextRequest) {
   try {
+    // Debug: Verify DATABASE_URL is set
+    console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
+    
     const { email } = await request.json();
 
     // 1. Validate email format
