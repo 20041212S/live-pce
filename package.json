@@ -4,14 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "prisma generate",
+
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
+
     "import:knowledge": "tsx scripts/importKnowledge.ts",
     "import:chatlogs": "tsx scripts/importChatLogsAsKnowledge.ts"
   },
@@ -19,12 +20,11 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
-    "@prisma/adapter-better-sqlite3": "^7.2.0",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
+
     "@types/nodemailer": "^7.0.4",
     "bcryptjs": "^3.0.3",
-    "better-sqlite3": "^12.5.0",
     "dotenv": "^17.2.3",
     "groq-sdk": "^0.37.0",
     "jsonwebtoken": "^9.0.3",
@@ -32,7 +32,6 @@
     "nodemailer": "^7.0.12",
     "openai": "^6.15.0",
     "pg": "^8.16.3",
-    "postgres": "^3.4.7",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "prisma": "^7.2.0"
